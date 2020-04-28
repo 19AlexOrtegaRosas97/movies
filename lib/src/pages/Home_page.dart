@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:movies/src/Widgets/card_swiper_Widget.dart';
 import 'package:movies/src/providers/peliculas_providers.dart';
+
 //19AlexOrtega97
 class HomePage extends StatelessWidget {
+  final peliculasProvider = new PeliculasProvider();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,8 +20,10 @@ class HomePage extends StatelessWidget {
       ),
       body: Container(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             _swiperCard(),
+            _footer(context),
           ],
         ),
       ),
@@ -26,12 +31,39 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _swiperCard() {
-    
-    final peliculasProvider = new PeliculasProvider();
-    peliculasProvider.getEnCines();
+    return FutureBuilder(
+      future: peliculasProvider.getEnCines(),
+      builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
 
-    return CardSwiper(
-      movies: [1,2,3,4,5],
+        if(snapshot.hasData){
+          return CardSwiper(movies: snapshot.data);
+        }else{
+          return Container(
+            height: 400.0,
+            child: Center(
+              child: CircularProgressIndicator()
+            )
+          );
+        }
+      },
+    );
+  }
+
+  Widget _footer(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      child: Column(
+        children: <Widget>[
+          Text('Populares',style: Theme.of(context).textTheme.subhead,),
+          FutureBuilder(
+            future: peliculasProvider.getPoupulares(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              print(snapshot.data);
+              return Container();
+            },
+          ),
+        ],
+      ),
     );
   }
 }

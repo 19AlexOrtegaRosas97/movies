@@ -71,4 +71,13 @@ class Pelicula {
 
   }
 
+  getPosterImg(){
+    
+    if(posterPath == null){
+      return 'https://es.zenit.org/wp-content/uploads/2018/05/no-image-icon.png';
+    }else{
+      print('https://image.tmdb.org/t/p/w500$posterPath');
+      return 'https://image.tmdb.org/t/p/w500$posterPath';
+    }
+  }
 }
