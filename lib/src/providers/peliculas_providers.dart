@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:movies/src/models/pelicula_model.dart';
@@ -7,11 +8,22 @@ class PeliculasProvider {
   String _apiKey = 'dd48a6e26d794ab6452fc1ccd2f5fcc7';
   String _url = 'api.themoviedb.org';
   String _language = 'es-ES';
+  int _popularesPage=0;
+  bool _cargando = false;
 
-  Future<List<Pelicula>> getEnCines() async {
-    final url = Uri.https(_url, '3/movie/now_playing',
-        {'api_key': _apiKey, 'language': _language});
+  List<Pelicula> _populares = new List();
 
+  final _popularesStreamController = StreamController<List<Pelicula>>.broadcast();
+
+  Function(List<Pelicula>) get popularesSink => _popularesStreamController.sink.add;
+
+  Stream<List<Pelicula>> get popularesStream => _popularesStreamController.stream;
+
+  void disposeStrems(){
+    _popularesStreamController?.close();
+  }
+
+  Future<List<Pelicula>> _procesarRespuesta(Uri url) async {
     final resp = await http.get(url);
     final decodeData = json.decode(resp.body);
 
@@ -20,15 +32,31 @@ class PeliculasProvider {
     return peliculas.items;
   }
 
-  Future<List<Pelicula>> getPoupulares() async {
-    final url = Uri.https(_url, '3/movie/popular',
+  Future<List<Pelicula>> getEnCines() async {
+    final url = Uri.https(_url, '3/movie/now_playing',
         {'api_key': _apiKey, 'language': _language});
 
-    final resp = await http.get(url);
-    final decodeData = json.decode(resp.body);
+    return await _procesarRespuesta(url);
+  }
 
-    final peliculas = new Peliculas.fromJsonList(decodeData['results']);
+  Future<List<Pelicula>> getPoupulares() async {
 
-    return peliculas.items;
+    if(_cargando) return [];
+
+    _cargando=true;
+
+    _popularesPage++;
+    final url = Uri.https(_url, '3/movie/popular',{
+        'api_key'  : _apiKey, 
+        'language' : _language,
+        'page'     : _popularesPage.toString(),
+    });
+
+    final resp = await _procesarRespuesta(url);
+
+    _populares.addAll(resp);
+    popularesSink(_populares);
+    _cargando=false;
+    return resp;
   }
 }
