@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:movies/src/Widgets/card_swiper_Widget.dart';
 import 'package:movies/src/Widgets/movie_horizontal.dart';
 import 'package:movies/src/providers/peliculas_providers.dart';
+import 'package:movies/src/search/search_delegate.dart';
 
 //19AlexOrtega97
 class HomePage extends StatelessWidget {
@@ -18,7 +19,13 @@ class HomePage extends StatelessWidget {
         actions: <Widget>[
           IconButton(
               icon: Icon(Icons.search, color: Colors.white), 
-              onPressed: () {}
+              onPressed: () {
+                showSearch(
+                  context: context, 
+                  delegate: DataSearch(),
+                  //query: 'Holaa',
+                );
+              }
           ),
         ],
       ),
